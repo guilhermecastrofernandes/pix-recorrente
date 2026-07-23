@@ -1,5 +1,6 @@
 package com.pix.recorrente.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.pix.recorrente.domain.enums.EnumFrequencia;
 import com.pix.recorrente.domain.enums.EnumStatusAgendamento;
 import com.pix.recorrente.domain.enums.EnumStatusPagamento;
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record AgendamentoResponse(
         UUID id,
         String clienteId,
