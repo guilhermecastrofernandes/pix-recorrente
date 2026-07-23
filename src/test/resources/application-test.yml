@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: pix-recorrente-api-test
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  h2:
+    console:
+      enabled: true
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+server:
+  port: 0
+
+antifraude:
+  limite-valor-suspeito: 5000.00
+  limite-noturno: 1000.00
+  chaves-blacklist:
+    - fraudulento@banco.com.br
+    - suspeito@empresa.com.br
+    - "11999999999"

@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: pix-recorrente-api
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: true
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+antifraude:
+  limite-valor-suspeito: 5000.00
+  limite-noturno: 1000.00
+  chaves-blacklist:
+    - fraudulento@banco.com.br
+    - suspeito@empresa.com.br
+    - "11999999999"
+
+scheduler:
+  pagamento:
+    delay: 60000
+    initial-delay: 5000
+
+server:
+  port: 8080
