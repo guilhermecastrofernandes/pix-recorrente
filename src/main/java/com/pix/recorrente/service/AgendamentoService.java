@@ -48,13 +48,16 @@ public class AgendamentoService {
         String analiseFraudeJson = analiseFraudeJsonSerializer.serialize(analiseFraude);
 
         Agendamento agendamento = agendamentoMapper.toEntity(request, chaveIdempotencia, analiseFraudeJson);
-        statusTransitioner.transicionar(agendamento, analiseFraude.statusRisco());
 
         if (analiseFraude.statusRisco() == EnumStatusRisco.REJEITADO) {
+            agendamento.setStatus(agendamento.getStatus());
+            agendamentoRepository.save(agendamento);
             throw new AgendamentoRejeitadoFraudeException("Agendamento rejeitado pelas regras de fraude", analiseFraude);
         }
 
-        return agendamentoRepository.save(agendamento);
+        agendamentoRepository.saveAndFlush(agendamento);
+        statusTransitioner.transicionar(agendamento, analiseFraude.statusRisco());
+        return agendamento;
     }
 
     @Transactional(readOnly = true)

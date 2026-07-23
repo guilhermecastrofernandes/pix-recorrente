@@ -1,5 +1,6 @@
 package com.pix.recorrente.service.mapper;
 
+import com.pix.recorrente.domain.enums.EnumStatusAgendamento;
 import com.pix.recorrente.domain.model.Agendamento;
 import com.pix.recorrente.dto.AgendamentoRequest;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ public class AgendamentoMapper {
         agendamento.setDataCriacao(LocalDateTime.now());
         agendamento.setChaveIdempotencia(chaveIdempotencia);
         agendamento.setAnaliseFraudeJson(analiseFraudeJson);
+        agendamento.setStatus(EnumStatusAgendamento.EM_ANALISE);
         return agendamento;
     }
 }
