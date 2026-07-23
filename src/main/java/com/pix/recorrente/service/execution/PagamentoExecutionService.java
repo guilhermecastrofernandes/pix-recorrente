@@ -25,12 +25,15 @@ public class PagamentoExecutionService {
 
             simulaProcessamentoPix(pagamento);
 
-            pagamento.setStatus(EnumStatusPagamento.SUCESSO);
-            pagamento.setDataExecucao(LocalDateTime.now());
+            pagamento.marcarComoSucesso();
             pagamentoRepository.save(pagamento);
         } catch (Exception e) {
-            pagamento.setStatus(EnumStatusPagamento.FALHA_PROCESSAMENTO);
-            pagamento.setMensagemErro(e.getMessage());
+            pagamento.marcarComoFalha(e.getMessage());
+
+            if (pagamento.getTentativas() >= 3) {
+                pagamento.setStatus(EnumStatusPagamento.ENVIADO_DLQ);
+            }
+
             pagamentoRepository.save(pagamento);
             throw e;
         }

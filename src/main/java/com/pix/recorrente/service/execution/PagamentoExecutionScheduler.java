@@ -28,11 +28,17 @@ public class PagamentoExecutionScheduler {
         LocalDate hoje = LocalDate.now();
         List<PagamentoRecorrente> pagamentosPendentes = pagamentoRepository.findPendentes(EnumStatusPagamento.PENDENTE, hoje);
 
-        logger.info("Iniciando execução de {} pagamentos pendentes", pagamentosPendentes.size());
+        var agora = java.time.LocalDateTime.now();
+        List<PagamentoRecorrente> pagamentosRetry = pagamentoRepository.findComRetry(EnumStatusPagamento.FALHA_PROCESSAMENTO, agora);
+
+        logger.info("Iniciando execução de {} pendentes + {} retries", pagamentosPendentes.size(), pagamentosRetry.size());
+
+        pagamentosPendentes.addAll(pagamentosRetry);
 
         for (PagamentoRecorrente pagamento : pagamentosPendentes) {
             try {
-                logger.debug("Executando pagamento ID: {} para agendamento: {}", pagamento.getId(), pagamento.getAgendamentoId());
+                logger.debug("Executando pagamento ID: {} (tentativa: {}) para agendamento: {}",
+                    pagamento.getId(), pagamento.getTentativas(), pagamento.getAgendamentoId());
                 pagamentoExecutionService.executarPagamento(pagamento);
                 logger.info("Pagamento ID: {} executado com sucesso", pagamento.getId());
             } catch (Exception e) {
@@ -40,6 +46,6 @@ public class PagamentoExecutionScheduler {
             }
         }
 
-        logger.info("Execução de pagamentos pendentes finalizada");
+        logger.info("Execução de pagamentos finalizada");
     }
 }

@@ -26,6 +26,7 @@ public record AgendamentoResponse(
         List<PagamentoResponse> pagamentos
 ) {
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public record AnaliseFraudeResponse(
             EnumStatusRisco statusRisco,
             Integer score,
@@ -33,6 +34,7 @@ public record AgendamentoResponse(
             LocalDateTime dataAnalise
     ) {}
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public record PagamentoResponse(
             UUID id,
             LocalDate dataPrevista,

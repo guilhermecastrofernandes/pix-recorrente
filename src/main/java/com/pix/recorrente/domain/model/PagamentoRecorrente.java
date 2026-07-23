@@ -34,6 +34,10 @@ public class PagamentoRecorrente {
 
     private String mensagemErro;
 
+    private Integer tentativas = 0;
+
+    private LocalDateTime proximaExecucao;
+
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
 
@@ -57,6 +61,12 @@ public class PagamentoRecorrente {
 
     public String getMensagemErro() { return mensagemErro; }
     public void setMensagemErro(String mensagemErro) { this.mensagemErro = mensagemErro; }
+
+    public Integer getTentativas() { return tentativas; }
+    public void setTentativas(Integer tentativas) { this.tentativas = tentativas; }
+
+    public LocalDateTime getProximaExecucao() { return proximaExecucao; }
+    public void setProximaExecucao(LocalDateTime proximaExecucao) { this.proximaExecucao = proximaExecucao; }
 
     // ===== Domain Methods (Business Logic) =====
 
@@ -92,10 +102,13 @@ public class PagamentoRecorrente {
         this.mensagemErro = null;
     }
 
-    /** Marca pagamento como falha com mensagem de erro. */
+    /** Marca pagamento como falha com mensagem de erro. Calcula próxima tentativa com exponential backoff. */
     public void marcarComoFalha(String mensagemErro) {
         this.status = EnumStatusPagamento.FALHA_PROCESSAMENTO;
         this.mensagemErro = mensagemErro;
+        this.tentativas = (this.tentativas != null ? this.tentativas : 0) + 1;
+        long delaySeconds = (long) Math.pow(2, this.tentativas);
+        this.proximaExecucao = LocalDateTime.now().plusSeconds(delaySeconds);
     }
 
     @Override
