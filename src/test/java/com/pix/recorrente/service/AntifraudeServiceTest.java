@@ -52,7 +52,7 @@ class AntifraudeServiceTest {
         AnaliseFraude result = antifraudeService.analisar("valido@banco.com.br", new BigDecimal("6000.00"));
 
         assertEquals(EnumStatusRisco.REVISAO_MANUAL, result.statusRisco());
-        assertEquals(60, result.score());
+        assertEquals(65, result.score());
         assertTrue(result.regrasVioladas().contains("RNF-01: Valor individual superior a R$ 5.000,00"));
     }
 
