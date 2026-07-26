@@ -71,11 +71,11 @@ Consultar agendamento + histórico de pagamentos.
 2. **RNF-02**: Chave Pix em blacklist → REJEITADO
 3. **RNF-03**: 20h-06h + valor > R$ 1.000,00 → REVISAO_MANUAL
 
-Score: 5 (aprovado), 50-65 (revisão), 95 (rejeitado)
+Score: 100 (aprovado), 40 (revisão), 10 (rejeitado). Escala decrescente: maior score = menor risco.
 
 ## Arquitetura
 
-- **Linguagem**: Java 21 + Spring Boot 3.3.2
+- **Linguagem**: Java 21 + Spring Boot 3.4.1
 - **DB**: H2 (em-memória, para PoC)
 - **Messaging**: RabbitMQ + DLQ
 - **Idempotência**: unique constraint + X-Idempotency-Key
