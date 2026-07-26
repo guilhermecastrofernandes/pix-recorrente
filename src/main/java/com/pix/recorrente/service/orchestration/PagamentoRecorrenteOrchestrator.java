@@ -23,12 +23,13 @@ public class PagamentoRecorrenteOrchestrator {
             return;
         }
 
-        PagamentoRecorrente pagamento = new PagamentoRecorrente();
-        pagamento.setAgendamentoId(payload.agendamentoId());
-        pagamento.setValor(payload.valor());
-        pagamento.setDataPrevista(payload.dataInicio());
-        pagamento.setStatus(EnumStatusPagamento.PENDENTE);
-        pagamento.setChaveIdempotencia(payload.chaveIdempotencia());
+        PagamentoRecorrente pagamento = PagamentoRecorrente.builder()
+                .agendamentoId(payload.agendamentoId())
+                .valor(payload.valor())
+                .dataPrevista(payload.dataInicio())
+                .status(EnumStatusPagamento.PENDENTE)
+                .chaveIdempotencia(payload.chaveIdempotencia())
+                .build();
 
         pagamentoRepository.save(pagamento);
     }

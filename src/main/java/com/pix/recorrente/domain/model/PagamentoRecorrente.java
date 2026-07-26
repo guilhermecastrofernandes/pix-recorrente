@@ -2,6 +2,10 @@ package com.pix.recorrente.domain.model;
 
 import com.pix.recorrente.domain.enums.EnumStatusPagamento;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.Builder.Default;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -9,6 +13,9 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "pagamentos_recorrentes")
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class PagamentoRecorrente {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -34,6 +41,7 @@ public class PagamentoRecorrente {
 
     private String mensagemErro;
 
+    @Default
     private Integer tentativas = 0;
 
     private LocalDateTime proximaExecucao;

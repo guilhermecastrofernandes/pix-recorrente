@@ -3,6 +3,9 @@ package com.pix.recorrente.domain.model;
 import com.pix.recorrente.domain.enums.EnumFrequencia;
 import com.pix.recorrente.domain.enums.EnumStatusAgendamento;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -10,6 +13,9 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "agendamentos")
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Agendamento {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

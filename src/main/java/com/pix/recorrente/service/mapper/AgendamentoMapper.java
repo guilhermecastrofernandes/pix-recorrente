@@ -10,17 +10,17 @@ import java.time.LocalDateTime;
 @Service
 public class AgendamentoMapper {
     public Agendamento toEntity(AgendamentoRequest request, String chaveIdempotencia, String analiseFraudeJson) {
-        Agendamento agendamento = new Agendamento();
-        agendamento.setClienteId(request.clienteId());
-        agendamento.setChavePixRecebedor(request.chavePixRecebedor());
-        agendamento.setValor(request.valor());
-        agendamento.setFrequencia(request.frequencia());
-        agendamento.setDataInicio(request.dataInicio());
-        agendamento.setQuantidadeParcelas(request.quantidadeParcelas());
-        agendamento.setDataCriacao(LocalDateTime.now());
-        agendamento.setChaveIdempotencia(chaveIdempotencia);
-        agendamento.setAnaliseFraudeJson(analiseFraudeJson);
-        agendamento.setStatus(EnumStatusAgendamento.EM_ANALISE);
-        return agendamento;
+        return Agendamento.builder()
+                .clienteId(request.clienteId())
+                .chavePixRecebedor(request.chavePixRecebedor())
+                .valor(request.valor())
+                .frequencia(request.frequencia())
+                .dataInicio(request.dataInicio())
+                .quantidadeParcelas(request.quantidadeParcelas())
+                .dataCriacao(LocalDateTime.now())
+                .chaveIdempotencia(chaveIdempotencia)
+                .analiseFraudeJson(analiseFraudeJson)
+                .status(EnumStatusAgendamento.EM_ANALISE)
+                .build();
     }
 }
