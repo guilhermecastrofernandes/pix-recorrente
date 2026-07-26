@@ -11,8 +11,8 @@ PoC de API para agendamento de Pix recorrente com m√≥dulo antifraude, orquestra√
 ## Build
 
 ```bash
-./mvnw clean compile
-./mvnw package -DskipTests
+mvn clean compile
+mvn package -DskipTests
 ```
 
 ## Rodar Localmente
@@ -20,7 +20,7 @@ PoC de API para agendamento de Pix recorrente com m√≥dulo antifraude, orquestra√
 ### Sem Docker (precisa RabbitMQ rodando em localhost:5672)
 
 ```bash
-./mvnw spring-boot:run
+mvn spring-boot:run
 ```
 
 App dispon√≠vel em `http://localhost:8080`
@@ -107,7 +107,7 @@ src/main/java/com/pix/recorrente/
 ## Testes
 
 ```bash
-./mvnw test
+mvn test
 ```
 
 ## Docker
