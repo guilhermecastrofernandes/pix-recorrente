@@ -71,7 +71,12 @@ Consultar agendamento + histórico de pagamentos.
 2. **RNF-02**: Chave Pix em blacklist → REJEITADO
 3. **RNF-03**: 20h-06h + valor > R$ 1.000,00 → REVISAO_MANUAL
 
-Score: 100 (aprovado), 40 (revisão), 10 (rejeitado). Escala decrescente: maior score = menor risco.
+Cada regra apenas ajusta o score (o menor valor vence); o status final é derivado da faixa:
+- `score <= 10` → REJEITADO
+- `11 <= score <= 40` → REVISAO_MANUAL
+- `41 <= score <= 100` → APROVADO
+
+Score inicial 100. RNF-01/RNF-03 rebaixam para 40, RNF-02 rebaixa para 10.
 
 ## Arquitetura
 
@@ -131,44 +136,10 @@ JDBC URL: `jdbc:h2:mem:testdb`
 User: `sa`
 Password: (vazio)
 
-## Specs
-
-- [01-requirements.md](specs/01-requirements.md)
-- [02-domain-models.md](specs/02-domain-models.md)
-- [03-endpoints.md](specs/03-endpoints.md)
-
-## SLA
-
-- Resposta POST: < 200ms (síncrono)
-- Retry: 3x com exponential backoff
-- Pagamentos: async via RabbitMQ
-
-## Padrões de Design
-
-- **Chain of Responsibility**: Regras de fraude (RNF-01, RNF-02, RNF-03) plugáveis
-- **State Machine**: Transições de status explícitas (ATIVO, EM_ANALISE, REJEITADO)
-- **Builder**: Construção de payload de orquestração
-- **Strategy**: Implementações de estado (AtivoState, EmAnaliseState, etc)
-
-## Princípios SOLID
-
-- **SRP**: Serviços isolados (Serializer, Mapper, Builder, Orchestrator)
-- **OCP**: Estados extensíveis via Strategy, regras plugáveis via Chain
-- **DIP**: Abstrações em services, injeção de dependências
-
 ## Automação
 
 - **Scheduler**: PagamentoExecutionScheduler roda a cada 60s
 - **Execução**: PagamentoRecorrente com status PENDENTE é executado automaticamente
 - **Resiliência**: Falha não bloqueia loop (continua próximos pagamentos)
 
-## Roadmap Pós-PoC
 
-**Fase 1:** Retry com exponential backoff + DLQ monitoring
-**Fase 2:** Authentication (JWT/OAuth2) + Rate limiting  
-**Fase 3:** Event-driven com Kafka + SPI/BACEN integration
-**Fase 4:** Schema registry (Avro) + Auditoria
-
-## Docs Detalhadas
-
-- [04-case.md](specs/04-case.md) — Design patterns, SOLID, trade-offs
