@@ -18,7 +18,7 @@ public class RNF02BlacklistRule implements FraudRule {
         if (properties.getChavesBlacklist().contains(chavePixRecebedor)) {
             context.addRegraViolada("RNF-02: Chave Pix cadastrada em lista de risco nacional");
             context.setStatusRisco(EnumStatusRisco.REJEITADO);
-            context.setScore(95);
+            context.setScore(10);
         }
     }
 }

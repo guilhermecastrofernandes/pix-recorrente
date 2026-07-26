@@ -43,7 +43,7 @@ class AntifraudeServiceTest {
         AnaliseFraude result = antifraudeService.analisar("valido@banco.com.br", new BigDecimal("100.00"));
 
         assertEquals(EnumStatusRisco.APROVADO, result.statusRisco());
-        assertEquals(5, result.score());
+        assertEquals(100, result.score());
         assertTrue(result.regrasVioladas().isEmpty());
     }
 
@@ -52,7 +52,7 @@ class AntifraudeServiceTest {
         AnaliseFraude result = antifraudeService.analisar("valido@banco.com.br", new BigDecimal("6000.00"));
 
         assertEquals(EnumStatusRisco.REVISAO_MANUAL, result.statusRisco());
-        assertEquals(65, result.score());
+        assertEquals(40, result.score());
         assertTrue(result.regrasVioladas().contains("RNF-01: Valor individual superior a R$ 5.000,00"));
     }
 
@@ -61,7 +61,7 @@ class AntifraudeServiceTest {
         AnaliseFraude result = antifraudeService.analisar("fraudulento@banco.com.br", new BigDecimal("100.00"));
 
         assertEquals(EnumStatusRisco.REJEITADO, result.statusRisco());
-        assertEquals(95, result.score());
+        assertEquals(10, result.score());
         assertTrue(result.regrasVioladas().contains("RNF-02: Chave Pix cadastrada em lista de risco nacional"));
     }
 

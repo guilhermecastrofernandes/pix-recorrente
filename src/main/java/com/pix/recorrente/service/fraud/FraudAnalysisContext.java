@@ -6,7 +6,7 @@ import java.util.List;
 
 public class FraudAnalysisContext {
     private EnumStatusRisco statusRisco = EnumStatusRisco.APROVADO;
-    private int score = 5;
+    private int score = 100;
     private final List<String> regrasVioladas = new ArrayList<>();
 
     public EnumStatusRisco getStatusRisco() {
@@ -22,7 +22,7 @@ public class FraudAnalysisContext {
     }
 
     public void setScore(int score) {
-        this.score = Math.max(this.score, score);
+        this.score = Math.min(this.score, score);
     }
 
     public List<String> getRegrasVioladas() {

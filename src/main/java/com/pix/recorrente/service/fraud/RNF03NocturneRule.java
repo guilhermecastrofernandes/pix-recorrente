@@ -21,7 +21,7 @@ public class RNF03NocturneRule implements FraudRule {
             context.addRegraViolada("RNF-03: Agendamento em horário noturno com valor elevado");
             if (context.getStatusRisco() != EnumStatusRisco.REJEITADO) {
                 context.setStatusRisco(EnumStatusRisco.REVISAO_MANUAL);
-                context.setScore(65);
+                context.setScore(40);
             }
         }
     }
