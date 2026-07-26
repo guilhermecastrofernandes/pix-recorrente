@@ -26,6 +26,14 @@ spring:
     username: guest
     password: guest
 
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+
 antifraude:
   limite-valor-suspeito: 5000.00
   limite-noturno: 1000.00
@@ -38,6 +46,14 @@ scheduler:
   pagamento:
     delay: 60000
     initial-delay: 5000
+  dlq-scanner:
+    delay: 60000
+    initial-delay: 10000
+
+pix:
+  simulacao:
+    taxa-falha: 0.0      # 0.0 a 1.0 - probabilidade de falha na liquidacao simulada
+    latencia-ms: 100
 
 server:
   port: 8080

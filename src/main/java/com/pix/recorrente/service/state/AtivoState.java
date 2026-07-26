@@ -1,5 +1,6 @@
 package com.pix.recorrente.service.state;
 
+import com.pix.recorrente.domain.enums.EnumStatusAgendamento;
 import com.pix.recorrente.domain.model.Agendamento;
 import com.pix.recorrente.messaging.OrquestracaoPublisher;
 import org.springframework.stereotype.Component;
@@ -10,6 +11,11 @@ public class AtivoState implements AgendamentoState {
 
     public AtivoState(OrquestracaoPublisher orquestracaoPublisher) {
         this.orquestracaoPublisher = orquestracaoPublisher;
+    }
+
+    @Override
+    public EnumStatusAgendamento status() {
+        return EnumStatusAgendamento.ATIVO;
     }
 
     @Override

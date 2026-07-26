@@ -7,17 +7,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
-public class RejeitadoFraudeState implements AgendamentoState {
-    private static final Logger logger = LoggerFactory.getLogger(RejeitadoFraudeState.class);
+public class ConcluidoState implements AgendamentoState {
+    private static final Logger logger = LoggerFactory.getLogger(ConcluidoState.class);
 
     @Override
     public EnumStatusAgendamento status() {
-        return EnumStatusAgendamento.REJEITADO_FRAUDE;
+        return EnumStatusAgendamento.CONCLUIDO;
     }
 
     @Override
     public void onEnter(Agendamento agendamento) {
-        logger.warn("Agendamento {} rejeitado pelo modulo de fraude. Cliente: {}",
-                agendamento.getId(), agendamento.getClienteId());
+        logger.info("Agendamento {} concluido: todas as {} parcelas foram executadas",
+                agendamento.getId(), agendamento.getQuantidadeParcelas());
     }
 }

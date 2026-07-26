@@ -19,9 +19,22 @@ spring:
     port: 5672
     username: guest
     password: guest
+    listener:
+      simple:
+        auto-startup: false   # testes nao dependem de broker; o publisher e mockado
 
 server:
   port: 0
+
+scheduler:
+  pagamento:
+    delay: 3600000
+    initial-delay: 3600000    # scheduler nao dispara durante os testes
+
+pix:
+  simulacao:
+    taxa-falha: 0.0
+    latencia-ms: 0
 
 antifraude:
   limite-valor-suspeito: 5000.00

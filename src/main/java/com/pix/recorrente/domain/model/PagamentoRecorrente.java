@@ -4,7 +4,9 @@ import com.pix.recorrente.domain.enums.EnumStatusPagamento;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.Builder.Default;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -13,6 +15,8 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "pagamentos_recorrentes")
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -39,6 +43,9 @@ public class PagamentoRecorrente {
     @Column(nullable = false, unique = true)
     private String chaveIdempotencia;
 
+    @Column(nullable = false)
+    private Integer numeroParcela;
+
     private String mensagemErro;
 
     @Default
@@ -46,71 +53,18 @@ public class PagamentoRecorrente {
 
     private LocalDateTime proximaExecucao;
 
-    public UUID getId() { return id; }
-    public void setId(UUID id) { this.id = id; }
+    private LocalDateTime alertadoEm;
 
-    public UUID getAgendamentoId() { return agendamentoId; }
-    public void setAgendamentoId(UUID agendamentoId) { this.agendamentoId = agendamentoId; }
-
-    public BigDecimal getValor() { return valor; }
-    public void setValor(BigDecimal valor) { this.valor = valor; }
-
-    public LocalDate getDataPrevista() { return dataPrevista; }
-    public void setDataPrevista(LocalDate dataPrevista) { this.dataPrevista = dataPrevista; }
-
-    public LocalDateTime getDataExecucao() { return dataExecucao; }
-    public void setDataExecucao(LocalDateTime dataExecucao) { this.dataExecucao = dataExecucao; }
-
-    public EnumStatusPagamento getStatus() { return status; }
-    public void setStatus(EnumStatusPagamento status) { this.status = status; }
-
-    public String getChaveIdempotencia() { return chaveIdempotencia; }
-    public void setChaveIdempotencia(String chaveIdempotencia) { this.chaveIdempotencia = chaveIdempotencia; }
-
-    public String getMensagemErro() { return mensagemErro; }
-    public void setMensagemErro(String mensagemErro) { this.mensagemErro = mensagemErro; }
-
-    public Integer getTentativas() { return tentativas; }
-    public void setTentativas(Integer tentativas) { this.tentativas = tentativas; }
-
-    public LocalDateTime getProximaExecucao() { return proximaExecucao; }
-    public void setProximaExecucao(LocalDateTime proximaExecucao) { this.proximaExecucao = proximaExecucao; }
-
-    // ===== Domain Methods (Business Logic) =====
-
-    /** Retorna se pagamento está pendente de execução. */
-    public boolean estaPendente() {
-        return this.status == EnumStatusPagamento.PENDENTE;
+    public void marcarComoAlertado(LocalDateTime quando) {
+        this.alertadoEm = quando;
     }
 
-    /** Retorna se pagamento foi executado com sucesso. */
-    public boolean foiExecutado() {
-        return this.status == EnumStatusPagamento.SUCESSO;
-    }
-
-    /** Retorna se pagamento falhou (pode ser reprocessado). */
-    public boolean falhou() {
-        return this.status == EnumStatusPagamento.FALHA_PROCESSAMENTO;
-    }
-
-    /** Retorna se pagamento está sendo processado. */
-    public boolean estaProcessando() {
-        return this.status == EnumStatusPagamento.PROCESSANDO;
-    }
-
-    /** Retorna se pagamento está em DLQ (irrecuperável sem intervenção). */
-    public boolean foiEnviadoAoDLQ() {
-        return this.status == EnumStatusPagamento.ENVIADO_DLQ;
-    }
-
-    /** Marca pagamento como processado com sucesso. */
     public void marcarComoSucesso() {
         this.status = EnumStatusPagamento.SUCESSO;
         this.dataExecucao = LocalDateTime.now();
         this.mensagemErro = null;
     }
 
-    /** Marca pagamento como falha com mensagem de erro. Calcula próxima tentativa com exponential backoff. */
     public void marcarComoFalha(String mensagemErro) {
         this.status = EnumStatusPagamento.FALHA_PROCESSAMENTO;
         this.mensagemErro = mensagemErro;
@@ -126,6 +80,7 @@ public class PagamentoRecorrente {
                 ", agendamentoId=" + agendamentoId +
                 ", valor=" + valor +
                 ", dataPrevista=" + dataPrevista +
+                ", numeroParcela=" + numeroParcela +
                 ", status=" + status +
                 '}';
     }

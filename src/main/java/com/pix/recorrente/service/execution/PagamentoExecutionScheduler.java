@@ -9,6 +9,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -25,17 +27,19 @@ public class PagamentoExecutionScheduler {
 
     @Scheduled(fixedDelayString = "${scheduler.pagamento.delay:60000}", initialDelayString = "${scheduler.pagamento.initial-delay:5000}")
     public void executarPagamentosPendentes() {
-        LocalDate hoje = LocalDate.now();
-        List<PagamentoRecorrente> pagamentosPendentes = pagamentoRepository.findPendentes(EnumStatusPagamento.PENDENTE, hoje);
+        List<PagamentoRecorrente> pendentes = pagamentoRepository.findPendentes(EnumStatusPagamento.PENDENTE, LocalDate.now());
+        List<PagamentoRecorrente> retries = pagamentoRepository.findComRetry(EnumStatusPagamento.FALHA_PROCESSAMENTO, LocalDateTime.now());
 
-        var agora = java.time.LocalDateTime.now();
-        List<PagamentoRecorrente> pagamentosRetry = pagamentoRepository.findComRetry(EnumStatusPagamento.FALHA_PROCESSAMENTO, agora);
+        if (pendentes.isEmpty() && retries.isEmpty()) {
+            return;
+        }
 
-        logger.info("Iniciando execução de {} pendentes + {} retries", pagamentosPendentes.size(), pagamentosRetry.size());
+        logger.info("Iniciando execução de {} pendentes + {} retries", pendentes.size(), retries.size());
 
-        pagamentosPendentes.addAll(pagamentosRetry);
+        List<PagamentoRecorrente> aExecutar = new ArrayList<>(pendentes);
+        aExecutar.addAll(retries);
 
-        for (PagamentoRecorrente pagamento : pagamentosPendentes) {
+        for (PagamentoRecorrente pagamento : aExecutar) {
             try {
                 logger.debug("Executando pagamento ID: {} (tentativa: {}) para agendamento: {}",
                     pagamento.getId(), pagamento.getTentativas(), pagamento.getAgendamentoId());

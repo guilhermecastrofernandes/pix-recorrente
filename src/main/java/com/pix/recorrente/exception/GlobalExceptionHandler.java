@@ -51,7 +51,6 @@ public class GlobalExceptionHandler {
                         af.dataAnalise()
                 );
             } catch (Exception e) {
-                // Se falhar parse, deixa null
             }
         }
 

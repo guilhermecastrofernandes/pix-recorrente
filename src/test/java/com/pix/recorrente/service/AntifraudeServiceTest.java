@@ -3,6 +3,7 @@ package com.pix.recorrente.service;
 import com.pix.recorrente.config.AntifraudeProperties;
 import com.pix.recorrente.domain.enums.EnumStatusRisco;
 import com.pix.recorrente.domain.model.AnaliseFraude;
+import com.pix.recorrente.service.fraud.FraudRule;
 import com.pix.recorrente.service.fraud.RNF01ValueLimitRule;
 import com.pix.recorrente.service.fraud.RNF02BlacklistRule;
 import com.pix.recorrente.service.fraud.RNF03NocturneRule;
@@ -10,13 +11,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class AntifraudeServiceTest {
-    private AntifraudeService antifraudeService;
+    private static final String REGRA_RNF03 = "RNF-03: Agendamento em horário noturno com valor elevado";
+    private static final ZoneId ZONA = ZoneId.systemDefault();
+
     private AntifraudeProperties properties;
 
     @BeforeEach
@@ -29,18 +36,29 @@ class AntifraudeServiceTest {
                 "suspeito@empresa.com.br",
                 "11999999999"
         ));
+    }
 
-        List<com.pix.recorrente.service.fraud.FraudRule> fraudRules = List.of(
-            new RNF01ValueLimitRule(properties),
-            new RNF02BlacklistRule(properties),
-            new RNF03NocturneRule(properties)
+    private AntifraudeService serviceNaHora(int hora) {
+        Clock clock = Clock.fixed(
+                ZonedDateTime.of(LocalDate.of(2026, 7, 26), java.time.LocalTime.of(hora, 0), ZONA).toInstant(),
+                ZONA
         );
-        antifraudeService = new AntifraudeService(fraudRules);
+
+        List<FraudRule> fraudRules = List.of(
+                new RNF01ValueLimitRule(properties),
+                new RNF02BlacklistRule(properties),
+                new RNF03NocturneRule(properties, clock)
+        );
+        return new AntifraudeService(fraudRules);
+    }
+
+    private AntifraudeService serviceDiurno() {
+        return serviceNaHora(14);
     }
 
     @Test
     void testAnalyzeApproved_LowValueAndValidKey() {
-        AnaliseFraude result = antifraudeService.analisar("valido@banco.com.br", new BigDecimal("100.00"));
+        AnaliseFraude result = serviceDiurno().analisar("valido@banco.com.br", new BigDecimal("100.00"));
 
         assertEquals(EnumStatusRisco.APROVADO, result.statusRisco());
         assertEquals(100, result.score());
@@ -49,7 +67,7 @@ class AntifraudeServiceTest {
 
     @Test
     void testAnalyzeManualReview_HighValue() {
-        AnaliseFraude result = antifraudeService.analisar("valido@banco.com.br", new BigDecimal("6000.00"));
+        AnaliseFraude result = serviceDiurno().analisar("valido@banco.com.br", new BigDecimal("6000.00"));
 
         assertEquals(EnumStatusRisco.REVISAO_MANUAL, result.statusRisco());
         assertEquals(40, result.score());
@@ -58,7 +76,7 @@ class AntifraudeServiceTest {
 
     @Test
     void testAnalyzeRejected_BlacklistedKey() {
-        AnaliseFraude result = antifraudeService.analisar("fraudulento@banco.com.br", new BigDecimal("100.00"));
+        AnaliseFraude result = serviceDiurno().analisar("fraudulento@banco.com.br", new BigDecimal("100.00"));
 
         assertEquals(EnumStatusRisco.REJEITADO, result.statusRisco());
         assertEquals(10, result.score());
@@ -66,10 +84,64 @@ class AntifraudeServiceTest {
     }
 
     @Test
-    void testAnalyzeNightWindowHighValue() {
-        // Não conseguimos testar hora específica sem mock de LocalDateTime
-        // Mas validamos que o campo existe
-        AnaliseFraude result = antifraudeService.analisar("valido@banco.com.br", new BigDecimal("500.00"));
-        assertNotNull(result.dataAnalise());
+    void testRNF03_NoiteComValorElevado_RevisaoManual() {
+        AnaliseFraude result = serviceNaHora(22).analisar("valido@banco.com.br", new BigDecimal("2000.00"));
+
+        assertEquals(EnumStatusRisco.REVISAO_MANUAL, result.statusRisco());
+        assertEquals(40, result.score());
+        assertTrue(result.regrasVioladas().contains(REGRA_RNF03));
+    }
+
+    @Test
+    void testRNF03_MadrugadaComValorElevado_RevisaoManual() {
+        AnaliseFraude result = serviceNaHora(3).analisar("valido@banco.com.br", new BigDecimal("2000.00"));
+
+        assertEquals(EnumStatusRisco.REVISAO_MANUAL, result.statusRisco());
+        assertTrue(result.regrasVioladas().contains(REGRA_RNF03));
+    }
+
+    @Test
+    void testRNF03_ForaDaJanelaNoturna_Aprovado() {
+        AnaliseFraude result = serviceNaHora(14).analisar("valido@banco.com.br", new BigDecimal("2000.00"));
+
+        assertEquals(EnumStatusRisco.APROVADO, result.statusRisco());
+        assertFalse(result.regrasVioladas().contains(REGRA_RNF03));
+    }
+
+    @Test
+    void testRNF03_LimiteDaJanela_InicioInclusivoFimExclusivo() {
+        assertTrue(serviceNaHora(20).analisar("valido@banco.com.br", new BigDecimal("2000.00"))
+                .regrasVioladas().contains(REGRA_RNF03), "20h deve estar dentro da janela");
+
+        assertFalse(serviceNaHora(6).analisar("valido@banco.com.br", new BigDecimal("2000.00"))
+                .regrasVioladas().contains(REGRA_RNF03), "06h deve estar fora da janela");
+    }
+
+    @Test
+    void testRNF03_NoiteComValorBaixo_Aprovado() {
+        AnaliseFraude result = serviceNaHora(22).analisar("valido@banco.com.br", new BigDecimal("500.00"));
+
+        assertEquals(EnumStatusRisco.APROVADO, result.statusRisco());
+        assertTrue(result.regrasVioladas().isEmpty());
+    }
+
+    @Test
+    void testRNF03_NaoRebaixaRejeitadoDaBlacklist() {
+        AnaliseFraude result = serviceNaHora(22).analisar("fraudulento@banco.com.br", new BigDecimal("2000.00"));
+
+        assertEquals(EnumStatusRisco.REJEITADO, result.statusRisco());
+        assertEquals(10, result.score());
+        assertTrue(result.regrasVioladas().contains(REGRA_RNF03));
+    }
+
+    @Test
+    void testRNF03_JanelaConfiguravel_PermiteDemoEmQualquerHora() {
+        properties.setHoraInicioNoturno(0);
+        properties.setHoraFimNoturno(23);
+
+        AnaliseFraude result = serviceNaHora(14).analisar("valido@banco.com.br", new BigDecimal("2000.00"));
+
+        assertEquals(EnumStatusRisco.REVISAO_MANUAL, result.statusRisco());
+        assertTrue(result.regrasVioladas().contains(REGRA_RNF03));
     }
 }

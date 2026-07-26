@@ -33,6 +33,7 @@ public class AgendamentoResponseBuilder {
         var pagamentosResponse = pagamentos.stream()
             .map(p -> new AgendamentoResponse.PagamentoResponse(
                 p.getId(),
+                p.getNumeroParcela(),
                 p.getDataPrevista(),
                 p.getValor(),
                 p.getStatus(),

@@ -15,4 +15,9 @@ public class AntifraudeProperties {
     private BigDecimal limiteValorSuspeito;
     private BigDecimal limiteNoturno;
     private Set<String> chavesBlacklist;
+
+    private int horaInicioNoturno = 20;
+
+
+    private int horaFimNoturno = 6;
 }

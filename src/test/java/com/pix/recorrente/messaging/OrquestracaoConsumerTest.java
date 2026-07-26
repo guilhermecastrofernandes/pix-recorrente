@@ -1,6 +1,5 @@
 package com.pix.recorrente.messaging;
 
-import com.pix.recorrente.config.RabbitMQConfig;
 import com.pix.recorrente.repository.PagamentoRecorrenteRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @SpringBootTest
 @Testcontainers
 @ActiveProfiles("test")
-class OrquestracaoConsumerIT {
+class OrquestracaoConsumerTest {
 
     @Container
     static RabbitMQContainer rabbitMQ = new RabbitMQContainer("rabbitmq:3.12-management");
@@ -25,7 +24,6 @@ class OrquestracaoConsumerIT {
 
     @Test
     void testConsumerContextLoads() {
-        // Teste básico: verifica se o app inicializa com consumer rodando
         assertNotNull(pagamentoRepository);
     }
 }

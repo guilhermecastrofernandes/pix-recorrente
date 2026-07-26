@@ -22,4 +22,7 @@ public interface PagamentoRecorrenteRepository extends JpaRepository<PagamentoRe
 
     @Query("SELECT p FROM PagamentoRecorrente p WHERE p.status = :status AND p.proximaExecucao <= :agora")
     List<PagamentoRecorrente> findComRetry(@Param("status") EnumStatusPagamento status, @Param("agora") java.time.LocalDateTime agora);
+
+    @Query("SELECT p FROM PagamentoRecorrente p WHERE p.status = :status AND p.alertadoEm IS NULL")
+    List<PagamentoRecorrente> findNaoAlertados(@Param("status") EnumStatusPagamento status);
 }
