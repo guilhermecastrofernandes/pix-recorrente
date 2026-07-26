@@ -128,6 +128,15 @@ docker-compose up -d
 docker-compose logs -f app
 ```
 
+## Swagger UI
+
+Documentação interativa gerada a partir dos controllers:
+
+- UI: `http://localhost:8080/swagger-ui.html`
+- JSON: `http://localhost:8080/v3/api-docs`
+
+Com Docker Compose, trocar a porta para `8081`.
+
 ## H2 Console
 
 Acesso: `http://localhost:8080/h2-console`
